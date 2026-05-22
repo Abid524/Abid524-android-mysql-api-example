@@ -47,7 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     
 } elseif ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // For POST requests, verify Firebase token for admin check
-    $headers = self::getHeaders();
+    $headers = getHeaders();
     
     $firebase_user = null;
     if (isset($headers['Authorization'])) {
@@ -59,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Check if user is admin
     if (!$firebase_user || !in_array($firebase_user['email'], ADMIN_EMAILS)) {
         http_response_code(403);
-        die(json_encode(['error' => 'Admin access required for POST requests']));
+        die(json_encode(['error' => 'Admin access required for POST requests. Your email: ' . ($firebase_user['email'] ?? 'unknown')]));
     }
     
     $input = json_decode(file_get_contents('php://input'), true);
