@@ -9,7 +9,7 @@ import java.util.concurrent.TimeUnit
 
 object ApiClient {
     // Update this with your actual Hostinger domain
-    private const val BASE_URL = "https://your-domain.hostinger.com/api/"
+    private const val BASE_URL = "https://lightgrey-louse-486270.hostingersite.com/api/"
     
     private var authToken: String? = null
     
