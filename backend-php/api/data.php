@@ -49,17 +49,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // For POST requests, verify Firebase token for admin check
     $headers = getHeaders();
     
+    // DEBUG: Log headers
+    error_log('POST Headers: ' . json_encode($headers));
+    
     $firebase_user = null;
+    $firebase_error = null;
+    
     if (isset($headers['Authorization'])) {
+        error_log('Authorization header found');
         if (preg_match('/Bearer\s+(.*)$/i', $headers['Authorization'], $matches)) {
-            $firebase_user = FirebaseAuth::verifyFirebaseToken($matches[1]);
+            $token = $matches[1];
+            error_log('Token extracted, length: ' . strlen($token));
+            $firebase_user = FirebaseAuth::verifyFirebaseToken($token);
+            
+            if (!$firebase_user) {
+                $firebase_error = 'Firebase token verification failed';
+                error_log($firebase_error);
+            } else {
+                error_log('Firebase user verified: ' . $firebase_user['email']);
+            }
+        } else {
+            $firebase_error = 'Invalid Authorization header format';
+            error_log($firebase_error);
         }
+    } else {
+        $firebase_error = 'No Authorization header provided';
+        error_log($firebase_error);
     }
     
     // Check if user is admin
-    if (!$firebase_user || !in_array($firebase_user['email'], ADMIN_EMAILS)) {
+    if (!$firebase_user) {
         http_response_code(403);
-        die(json_encode(['error' => 'Admin access required for POST requests. Your email: ' . ($firebase_user['email'] ?? 'unknown')]));
+        die(json_encode([
+            'error' => 'Firebase authentication failed: ' . ($firebase_error ?? 'Unknown error'),
+            'debug' => [
+                'has_auth_header' => isset($headers['Authorization']),
+                'admin_emails_configured' => count(ADMIN_EMAILS),
+                'message' => 'Add this email to ADMIN_EMAILS in config/database.php'
+            ]
+        ]));
+    }
+    
+    if (!in_array($firebase_user['email'], ADMIN_EMAILS)) {
+        http_response_code(403);
+        die(json_encode([
+            'error' => 'Admin access required for POST requests',
+            'your_email' => $firebase_user['email'],
+            'admin_emails_required' => ADMIN_EMAILS,
+            'message' => 'Your email is not in the admin list. Add it to ADMIN_EMAILS array.'
+        ]));
     }
     
     $input = json_decode(file_get_contents('php://input'), true);
