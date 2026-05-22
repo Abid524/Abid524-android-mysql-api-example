@@ -1,0 +1,40 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Android Studio
+.gradle
+.idea/
+*.iml
+*.apk
+*.ap_
+*.aab
+local.properties
+
+# PHP
+composer.lock
+vendor/
+.DS_Store
+
+# Environment files
+.env
+.env.local
+*.pem
+
+# Firebase config
+google-services.json
+
+# Logs
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
